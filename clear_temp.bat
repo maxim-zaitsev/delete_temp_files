@@ -43,7 +43,7 @@ rem exit
 
 REM deleting all files from folder then removing empty folders
 :DELETE_FUNC
-for /d %%f in (%1) do del /f /s /q "%%f"
+rem for /d %%f in (%1) do del /f /s /q "%%f"
 for /d %%a in (%1) do rmdir /s /q "%%a"
 exit /b
 
