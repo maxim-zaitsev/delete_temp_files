@@ -2,13 +2,10 @@
 SetLocal EnableDelayedExpansion
 
 :: Путь к директории c файлами
-Set WorkDir="%Temp%"
-:: Маска директории
-Set DirMask=tmp*
+Set WorkDir=%1
 
 :: Указываем разницу во времени, в секундах
-Set TimeDiff=30
-
+Set TimeDiff=%2
 
 :: Создаём VBS, чтобы обойти неприятный момент, связанный с тем, что
 :: ~tX выдает время последней модификации, а не создания, и такое
@@ -26,9 +23,9 @@ Call :SerializeTime
 Set TimeNow=%STime%
 Set DateNow=%Date%
 
-:: Получаем все файлы из директории и вложенных поддиректорий, передаем их
+:: Получаем все директории, передаем их
 :: в качестве аргумента ранее созданному скрипту.
-For /D %%A In ("%WorkDir%\%DirMask%") Do (
+For /D %%A In (%WorkDir%) Do (
 	For /F "tokens=1,2" %%B In ('CScript //nologo "%Temp%\GetCreationDate.vbs" "%%A"') Do (
 rem Проверяем на дату и время создания, не подходящие по времени создания - удаляем
 		If "%DateNow%"=="%%B" (
@@ -52,7 +49,7 @@ rem Дата не сошлась, время проверять нету смысла, удаляем.
 
 :: Подчищаем за собой
 Del "%Temp%\GetCreationDate.vbs"
-:: Pause&Exit
+Exit /B
 
 
 ::===Функции работы со временем в .bat====================================

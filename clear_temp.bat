@@ -1,4 +1,10 @@
 @echo off
+
+:: Маска директорий для удаления
+SET DirMask=tmp*
+:: Указываем разницу во времени, в секундах
+Set TimeDiff=1800
+
 SET start_time=%TIME%
 SET start_time=%start_time:~0,8%
 for /F %%x in ('wmic logicaldisk where name^='c:' get freespace /format:value') do set %%~x>nul
@@ -9,25 +15,23 @@ for /F %%A in ('powershell %diskspace% / 1073741824') do set diskspace=%%A
 for /F "tokens=1 delims=," %%a in ( "%diskspace%" ) do set diskspace_gb=%%a
 echo %DATE% %start_time% START Free Space: %freediskspace_gb% GB of %diskspace_gb% GB>>logs.txt
 
-rem temp folder name mask
-SET folder_mask=tmp*
 
 echo step1: delete files from "%SYSTEMDRIVE%\Temp"
 if not exist "%SYSTEMDRIVE%\Temp" (
     echo "%SYSTEMDRIVE%\Temp" is not exist. Go next step.
 ) else (
     echo "%SYSTEMDRIVE%\Temp" is exist. Let's delete all folders and files here!
-    call :DELETE_FUNC "%SYSTEMDRIVE%\Temp"   
+    call :DELETE_FUNC "%SYSTEMDRIVE%\Temp" %TimeDiff%
 )
 echo step2: delete files from "%WINDIR%\Temp"
-call :DELETE_FUNC "%WINDIR%\Temp\%folder_mask%"
+call :DELETE_FUNC "%WINDIR%\Temp\%DirMask%" %TimeDiff%
 if %Temp%==%Tmp% (
     echo step3: delete files from "%Temp%"
-    call :DELETE_FUNC "%Temp%\%folder_mask%"    
+    call :DELETE_FUNC "%Temp%\%DirMask%" %TimeDiff%
 ) else (
     echo step3: delete files from "%Temp%" and from "%Tmp%"
-	call :DELETE_FUNC "%Temp%\%folder_mask%"
-    call :DELETE_FUNC "%Tmp%\%folder_mask%"       
+	call :DELETE_FUNC "%Temp%\%DirMask%"
+    call :DELETE_FUNC "%Tmp%\%DirMask%"
 )
 SET end_time=%TIME%
 SET end_time=%end_time:~0,8%
@@ -39,12 +43,10 @@ for /F %%A in ('powershell %diskspace% / 1073741824') do set diskspace=%%A
 for /F "tokens=1 delims=," %%a in ( "%diskspace%" ) do set diskspace_gb=%%a
 echo %DATE% %end_time% END   Free Space: %freediskspace_gb% GB of %diskspace_gb% GB>>logs.txt
 
-rem exit
+::exit
 
-REM deleting all files from folder then removing empty folders
+:: deleting all files from folder then removing empty folders
 :DELETE_FUNC
-rem for /d %%f in (%1) do del /f /s /q "%%f"
-for /d %%a in (%1) do rmdir /s /q "%%a"
+CALL delete_by_time.bat %1 %2
 exit /b
-
 
