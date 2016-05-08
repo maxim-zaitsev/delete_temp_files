@@ -13,7 +13,7 @@ if not exist "%SYSTEMDRIVE%\Temp" (
     echo "%SYSTEMDRIVE%\Temp" is not exist. Go next step.
 ) else (
     echo "%SYSTEMDRIVE%\Temp" is exist. Let's delete all folders and files here!
-    call :DELETE_FUNC "%SYSTEMDRIVE%\Temp" %TimeDiff%
+    call :DELETE_FUNC "%SYSTEMDRIVE%\Temp\*" %TimeDiff%
 )
 echo step2: delete files from "%WINDIR%\Temp"
 call :DELETE_FUNC "%WINDIR%\Temp\%DirMask%" %TimeDiff%
@@ -27,7 +27,7 @@ if %Temp%==%Tmp% (
 )
 
 call :LOG END
-EXIT
+::EXIT
 
 :: Удаление всех папок по указанной в настройке маске
 :: arg1 - полный путь к рабочей директории
