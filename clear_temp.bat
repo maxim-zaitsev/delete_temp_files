@@ -91,12 +91,14 @@ rem Получаем разницу
 rem Если разница больше указанного времени - удаляем
 			If !Result! GTR !TimeDiff! (
 			    echo TRY TO DELETE: "%%~nxA" ^=^> !Result!s after creation date
-                rmdir /s /q "%%~A"
+                del /f/s/q "%%~A" > nul
+                rmdir /s/q "%%~A"
             ) Else echo IGNORED "%%~nxA" ^=^> !Result!s after creation date
 		) Else (
 rem Дата не сошлась, время проверять нету смысла, удаляем.
             echo TRY TO DELETE: "%%~nxA" ^=^> too old - created %%B
-			rmdir /s /q "%%~A"
+			del /f/s/q "%%~A" > nul
+            rmdir /s/q "%%~A"
 		)
 	)
 )
