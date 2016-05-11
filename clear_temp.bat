@@ -1,8 +1,9 @@
 @echo off
+setlocal EnableDelayedExpansion
 :: Маска директорий для удаления
 SET DirMask=tmp*
 :: Указываем разницу во времени, в секундах
-SET TimeDiff=1800
+SET TimeDiff=18
 :: Имя лог-файла
 SET log_file=logs.txt
 
@@ -30,11 +31,18 @@ if %Temp%==%Tmp% (
 
 :: Время окончания работы скрипта
 set t1=!time!
+:: Считаем время работы скрипта
+call :CALCULATE_JOB_TIME
+:: Пишем последнюю строчку в лог
 call :LOG END
 EXIT
 
+:: ==================================== FUNCTIONS ====================================================================
+
+
 :: Удаление всех папок по указанной в настройке маске
 :: arg1 - полный путь к рабочей директории
+:: arg2 - разница между текущем временем и датой создания файла
 :DELETE_FUNC
 CALL :DELETE_BY_TIME %1 %2
 exit /b
@@ -51,19 +59,23 @@ for /F %%A in ('powershell %diskspace% / 1073741824') do set diskspace=%%A
 for /F "tokens=1 delims=," %%a in ( "%diskspace%" ) do set diskspace_gb=%%a
 if "%1" equ "END" (
     SET "type_str=END  "
-    for /F "tokens=1-8 delims=:.," %%a in ("%t0: =0%:%t1: =0%") do set /a "ss=(((1%%e-1%%a)*60)+1%%f-1%%b)*60+1%%g-1%%c, ss+=(ss>>31) & 86400, hh=ss/3600, mm=ss/60-hh*60, ss%%=60, hh+=100, mm+=100, ss+=100"
-    SET WORKTIME=%hh:~-2%:%mm:~-2%:%ss:~-2%
-    echo %WORKTIME%
     SET "END_TEXT= JobTime: %WORKTIME%"
-     ) else (
-           SET type_str=%1
-           SET END_TEXT=
-           )
+) else (
+    SET type_str=%1
+    SET END_TEXT=
+)
 echo %DATE% %t_time% %type_str% Free Space: %freediskspace_gb% GB of %diskspace_gb% GB.%END_TEXT%>>%log_file%
 exit /b
 
+:: Вычисляет время работы скрипта
+:CALCULATE_JOB_TIME
+for /F "tokens=1-8 delims=:.," %%a in ("%t0: =0%:%t1: =0%") do set /a "ss=(((1%%e-1%%a)*60)+1%%f-1%%b)*60+1%%g-1%%c, ss+=(ss>>31) & 86400, hh=ss/3600, mm=ss/60-hh*60, ss%%=60, hh+=100, mm+=100, ss+=100"
+SET WORKTIME=%hh:~-2%:%mm:~-2%:%ss:~-2%
+exit /b
+
+
 :DELETE_BY_TIME
-SetLocal EnableDelayedExpansion
+:SetLocal EnableDelayedExpansion
 :: Путь к директории c файлами
 Set WorkDir=%1
 
